@@ -14,9 +14,9 @@ load_dotenv()
 
 
 def obtener_coordenadas(df, localidad):
-    df_filtrado = df[df['Población'] == localidad]
-    latitud = df_filtrado['Latitud'].values[0]
-    longitud = df_filtrado['Longitud'].values[0]
+    df_filtrado = df[df['NOMBRE_ACTUAL'] == localidad]
+    latitud = df_filtrado['LATITUD_ETRS89'].values[0]
+    longitud = df_filtrado['LONGITUD_ETRS89'].values[0]
     return latitud, longitud  
 
 def get_oauth_token(): 
@@ -51,21 +51,19 @@ def search_api(token, URL):
 # Configuración de la página
 st.set_page_config(page_title="Viviendas", page_icon="🏠")
 
+st.image("./data/imagen_ppal.webp", caption="HouseFinder", use_container_width=True)
+
 # Cargar datos
-df = pd.read_excel("./data/municipios_esp.xlsx", engine="openpyxl")
+df = pd.read_excel("./data/municipios.xlsx", engine="openpyxl")
 
-# Crear listas desplegables
-comunidades = df['Comunidad'].unique()
-comunidad = st.selectbox('Selecciona una Comunidad Autónoma', comunidades)
 
-# Filtrar provincias según la comunidad seleccionada
-df_filtrado_comunidad = df[df['Comunidad'] == comunidad]
-provincias = df_filtrado_comunidad['Provincia'].unique()
+# Seleccionar provincia
+provincias = df['PROVINCIA'].unique()
 provincia = st.selectbox('Selecciona una Provincia', provincias)
 
 # Filtrar poblaciones según la provincia seleccionada
-df_filtrado_provincia = df_filtrado_comunidad[df_filtrado_comunidad['Provincia'] == provincia]
-poblaciones = df_filtrado_provincia['Población'].unique()
+df_filtrado_provincia = df[df['PROVINCIA'] == provincia]
+poblaciones = df_filtrado_provincia['NOMBRE_ACTUAL'].unique()
 poblacion = st.selectbox('Selecciona una Población', poblaciones)
 
 # Crear slider para seleccionar el radio
