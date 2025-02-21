@@ -5,7 +5,12 @@ import pyproj
 
 url = 'https://raw.githubusercontent.com/JimenaAreta/thevalley-MDS/refs/heads/jimena/datasets/sample-flats-madrid-synthetic-coords.csv'
 
-df = pd.read_csv(url)
+
+
+@st.cache_data
+def load_data(url):
+    df = pd.read_csv(url)
+    return df
 
 # Función para convertir UTM a geográficas
 def utm_to_geographic(easting, northing, zone_number):
@@ -20,6 +25,9 @@ def utm_to_geographic(easting, northing, zone_number):
     lon, lat = transformer.transform(easting, northing)
     
     return lat, lon
+
+
+df=load_data(url)
 
 # Asumimos que la zona es la 30T (para Madrid)
 zone_number = 30
