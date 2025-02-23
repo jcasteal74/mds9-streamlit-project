@@ -89,9 +89,6 @@ bankOffer = 'false'
 
 df_tot = pd.DataFrame()
 limit = 10
-
-
- 
     
 for i in range(1,limit):
     url = ('https://api.idealista.com/3.5/'+country+'/search?operation='+operation+#"&locale="+locale+
