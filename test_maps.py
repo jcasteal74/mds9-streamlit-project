@@ -7,7 +7,7 @@ url = 'https://raw.githubusercontent.com/JimenaAreta/thevalley-MDS/refs/heads/ji
 
 
 
-@st.cache_data
+@st.cache_data(persist=True)
 def load_data(url):
     df = pd.read_csv(url)
     return df
