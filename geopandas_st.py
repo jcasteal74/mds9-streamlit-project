@@ -26,13 +26,13 @@ def load_geodata(zip_path):
 # Función para cargar el DataFrame de flats
 @st.cache_data
 def load_flats_data(excel_path):
-    return pd.read_excel(excel_path, engine='openpyxl')
+    return pd.read_csv(excel_path, sep=';')
 
 # Carga de ficheros
 zip_path = './data/Barrios.zip'
 gdf = load_geodata(zip_path)
 
-excel_path = './data/sample-flats-madrid-synthetic-coords.xlsx'
+excel_path = './datasource/sample-flats-madrid-synthetic-coords.csv'
 df_flats = load_flats_data(excel_path)
 
 # Transformación fichero flats
@@ -58,7 +58,7 @@ st.title('Exploración datos inmobiliarios')
 st.sidebar.title("Menú de navegación")
 seccion = st.sidebar.radio(
     "Selecciona una sección:",
-    ("Visualización de datos medios", "Visualización por barrios", "Información")
+    ("Visualización de datos medios", "Visualización por distritos", "Información", "Recursos")
 )
 
 if seccion == "Visualización de datos medios":
@@ -102,9 +102,26 @@ if seccion == "Visualización de datos medios":
     # Mostrar mapa en Streamlit
     folium_static(m)
 
-elif seccion == "Visualización por barrios":
-    st.write("Aquí puedes agregar contenido específico para la visualización por barrios.")
-    # Aquí puedes agregar más cosicas #
+elif seccion == "Visualización por distritos":
+    st.write("Aquí puedes agregar contenido específico para la visualización por distritos.")
+    import altair as alt
+    lista_distritos = df_flats.distrito.unique().tolist()
+    opcion = st.selectbox(
+        'Elige una opción:',
+        (lista_distritos)
+    )
+
+    df_flats_filtered = df_flats[df_flats['distrito'] == opcion]
+    
+    # Gráfico de dispersión interactivo entre área y precio
+    scatter = alt.Chart(df_flats_filtered).mark_circle(size=60).encode(
+        x='PRICE',
+        y='AREA',
+        color='barrio',
+        tooltip=['PRICE', 'AREA', 'barrio']
+    ).interactive()
+
+    st.altair_chart(scatter, use_container_width=True)
     
 elif seccion == "Información":
     st.write("Información")
@@ -115,4 +132,10 @@ elif seccion == "Información":
 
     # Mostrar el markdown en el sidebar
     st.markdown(markdown_text)
+    
+elif seccion == "Recursos":
+    st.write("Recursos")
+    
+    # Mostrar el markdown en el sidebar
+    st.markdown("### Esto es markdown ⬇️")
 
