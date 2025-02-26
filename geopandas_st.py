@@ -4,6 +4,7 @@ import pandas as pd
 import unicodedata
 import folium
 from streamlit_folium import folium_static
+from utils import convert_to_wgs84, calculate_map_center  # Importar la función desde utils.py
 
 # Función para eliminar acentos
 def eliminar_acentos(texto):
@@ -26,13 +27,13 @@ def load_geodata(zip_path):
 # Función para cargar el DataFrame de flats
 @st.cache_data
 def load_flats_data(excel_path):
-    return pd.read_excel(excel_path, engine='openpyxl')
+    return pd.read_csv(excel_path, sep=';')
 
 # Carga de ficheros
 zip_path = './data/Barrios.zip'
 gdf = load_geodata(zip_path)
 
-excel_path = './data/sample-flats-madrid-synthetic-coords.xlsx'
+excel_path = './datasource/sample-flats-madrid-synthetic-coords.csv'
 df_flats = load_flats_data(excel_path)
 
 # Transformación fichero flats
@@ -58,7 +59,7 @@ st.title('Exploración datos inmobiliarios')
 st.sidebar.title("Menú de navegación")
 seccion = st.sidebar.radio(
     "Selecciona una sección:",
-    ("Visualización de datos medios", "Visualización por barrios", "Información")
+    ("Visualización de datos medios", "Visualización por distritos", "Información", "Recursos")
 )
 
 if seccion == "Visualización de datos medios":
@@ -102,9 +103,97 @@ if seccion == "Visualización de datos medios":
     # Mostrar mapa en Streamlit
     folium_static(m)
 
-elif seccion == "Visualización por barrios":
-    st.write("Aquí puedes agregar contenido específico para la visualización por barrios.")
-    # Aquí puedes agregar más cosicas #
+elif seccion == "Visualización por distritos":
+    st.write("Aquí puedes agregar contenido específico para la visualización por distritos.")
+    import altair as alt
+    lista_distritos = df_flats.distrito.unique().tolist()
+    opcion = st.selectbox(
+        'Elige una opción:',
+        (lista_distritos)
+    )
+
+    df_flats_filtered = df_flats[df_flats['distrito'] == opcion]
+    
+    # Gráfico de dispersión interactivo entre área y precio
+    scatter = alt.Chart(df_flats_filtered).mark_circle(size=60).encode(
+        x='PRICE',
+        y='AREA',
+        color='barrio',
+        tooltip=['PRICE', 'AREA', 'barrio']
+    ).interactive()
+
+    # Gráfico de barras del número de pisos por barrio
+    bar_chart = alt.Chart(df_flats_filtered).mark_bar().encode(
+        x='barrio',
+        y='count()',
+        color='barrio',
+        tooltip=['barrio', 'count()']
+    ).interactive()
+
+    # Gráfico de líneas del precio medio por área
+    line_chart = alt.Chart(df_flats_filtered).mark_line().encode(
+        x='AREA',
+        y='mean(PRICE)',
+        color='barrio',
+        tooltip=['AREA', 'mean(PRICE)', 'barrio']
+    ).interactive()
+
+    # Combinar los gráficos verticalmente
+    combined_chart = alt.vconcat(
+        scatter,
+        bar_chart,
+        line_chart
+    ).resolve_scale(
+        color='independent'
+    )
+
+    st.altair_chart(combined_chart, use_container_width=True)
+    
+    
+    st.write("Localización de outliers")
+    
+    # Convertir las coordenadas del DataFrame a WGS84
+    original_crs = 25830  # Cambia esto por el EPSG de tu CRS original
+    df_wgs84 = convert_to_wgs84(df_flats_filtered, 'X', 'Y', original_crs)
+
+
+    
+    # Identificar outliers usando el método IQR
+    Q1 = df_wgs84['PRICE'].quantile(0.25)
+    Q3 = df_wgs84['PRICE'].quantile(0.75)
+    IQR = Q3 - Q1
+
+    outliers = df_wgs84[(df_wgs84['PRICE'] < (Q1 - 1.5 * IQR)) | (df_wgs84['PRICE'] > (Q3 + 1.5 * IQR))]
+    
+    if outliers.empty:
+        st.write("No se encontraron outliers.")
+    else:
+        # Calcular el centro del mapa a partir de las coordenadas de los outliers
+        center_lat, center_lon = calculate_map_center(outliers)
+
+        # Crear un mapa centrado en el centro calculado
+        m2 = folium.Map(location=[center_lat, center_lon], zoom_start=12)
+
+        # Añadir marcadores para los outliers
+        for idx, row in outliers.iterrows():
+            folium.Marker(
+                location=[row['latitude'], row['longitude']],  # Ajusta según las columnas de latitud y longitud en tu DataFrame
+                popup=f"Precio: {row['PRICE']}, Área: {row['AREA']}",
+                icon=folium.Icon(color='red', icon='info-sign')
+            ).add_to(m2)
+
+        # Renderizar el mapa en Streamlit
+        folium_static(m2)
+        
+        
+
+    # Añadir marcadores para los outliers
+    for idx, row in outliers.iterrows():
+        folium.Marker(
+            location=[row['latitude'], row['longitude']],  # Ajusta según las columnas de latitud y longitud en tu DataFrame
+            popup=f"Precio: {row['PRICE']}, Área: {row['AREA']}",
+            icon=folium.Icon(color='red', icon='info-sign')
+        ).add_to(m2)
     
 elif seccion == "Información":
     st.write("Información")
@@ -115,4 +204,10 @@ elif seccion == "Información":
 
     # Mostrar el markdown en el sidebar
     st.markdown(markdown_text)
+    
+elif seccion == "Recursos":
+    st.write("Recursos")
+    
+    # Mostrar el markdown en el sidebar
+    st.markdown("### Esto es markdown ⬇️")
 
