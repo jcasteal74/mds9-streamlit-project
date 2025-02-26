@@ -4,6 +4,7 @@ import pandas as pd
 import unicodedata
 import folium
 from streamlit_folium import folium_static
+from utils import convert_to_wgs84, calculate_map_center  # Importar la función desde utils.py
 
 # Función para eliminar acentos
 def eliminar_acentos(texto):
@@ -121,7 +122,78 @@ elif seccion == "Visualización por distritos":
         tooltip=['PRICE', 'AREA', 'barrio']
     ).interactive()
 
-    st.altair_chart(scatter, use_container_width=True)
+    # Gráfico de barras del número de pisos por barrio
+    bar_chart = alt.Chart(df_flats_filtered).mark_bar().encode(
+        x='barrio',
+        y='count()',
+        color='barrio',
+        tooltip=['barrio', 'count()']
+    ).interactive()
+
+    # Gráfico de líneas del precio medio por área
+    line_chart = alt.Chart(df_flats_filtered).mark_line().encode(
+        x='AREA',
+        y='mean(PRICE)',
+        color='barrio',
+        tooltip=['AREA', 'mean(PRICE)', 'barrio']
+    ).interactive()
+
+    # Combinar los gráficos verticalmente
+    combined_chart = alt.vconcat(
+        scatter,
+        bar_chart,
+        line_chart
+    ).resolve_scale(
+        color='independent'
+    )
+
+    st.altair_chart(combined_chart, use_container_width=True)
+    
+    
+    st.write("Localización de outliers")
+    
+    # Convertir las coordenadas del DataFrame a WGS84
+    original_crs = 25830  # Cambia esto por el EPSG de tu CRS original
+    df_wgs84 = convert_to_wgs84(df_flats_filtered, 'X', 'Y', original_crs)
+
+
+    
+    # Identificar outliers usando el método IQR
+    Q1 = df_wgs84['PRICE'].quantile(0.25)
+    Q3 = df_wgs84['PRICE'].quantile(0.75)
+    IQR = Q3 - Q1
+
+    outliers = df_wgs84[(df_wgs84['PRICE'] < (Q1 - 1.5 * IQR)) | (df_wgs84['PRICE'] > (Q3 + 1.5 * IQR))]
+    
+    if outliers.empty:
+        st.write("No se encontraron outliers.")
+    else:
+        # Calcular el centro del mapa a partir de las coordenadas de los outliers
+        center_lat, center_lon = calculate_map_center(outliers)
+
+        # Crear un mapa centrado en el centro calculado
+        m2 = folium.Map(location=[center_lat, center_lon], zoom_start=12)
+
+        # Añadir marcadores para los outliers
+        for idx, row in outliers.iterrows():
+            folium.Marker(
+                location=[row['latitude'], row['longitude']],  # Ajusta según las columnas de latitud y longitud en tu DataFrame
+                popup=f"Precio: {row['PRICE']}, Área: {row['AREA']}",
+                icon=folium.Icon(color='red', icon='info-sign')
+            ).add_to(m2)
+
+        # Renderizar el mapa en Streamlit
+        folium_static(m2)
+        
+        
+
+    # Añadir marcadores para los outliers
+    for idx, row in outliers.iterrows():
+        folium.Marker(
+            location=[row['latitude'], row['longitude']],  # Ajusta según las columnas de latitud y longitud en tu DataFrame
+            popup=f"Precio: {row['PRICE']}, Área: {row['AREA']}",
+            icon=folium.Icon(color='red', icon='info-sign')
+        ).add_to(m2)
     
 elif seccion == "Información":
     st.write("Información")
