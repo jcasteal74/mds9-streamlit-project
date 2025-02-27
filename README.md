@@ -16,17 +16,16 @@ Este es un proyecto basado en Streamlit para MDS9. Fecha límite: 1 de abril de 
 Para clonar un repositorio desde GitHub, usa el siguiente comando en tu terminal o línea de comandos:
 
 ```bash
-git clone https://github.com/usuario/repo.git
+git clone https://github.com/jcasteal74/mds9-streamlit-project.git
 ```
 
-Reemplaza `usuario` por el nombre de usuario o la organización en GitHub y `repo.git` por el nombre del repositorio.
 
 ## 2. Acceder al directorio del repositorio
 
 Después de clonar el repositorio, accede al directorio con:
 
 ```bash
-cd repo
+cd mds9-streamlit-project
 ```
 
 ## 3. Crear y activar un entorno virtual (opcional pero recomendado)
