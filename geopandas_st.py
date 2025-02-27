@@ -19,6 +19,13 @@ def get_median_df_byLOCATIONNAME(feature, df):
     df_median_feature.columns = ['NOMBRE', f"{feature}"]
     return df_median_feature
 
+st.set_page_config(
+    page_title="Housevidsor",
+    page_icon="./data/precio200x200.png", 
+)
+
+
+
 # Función para cargar el GeoDataFrame
 @st.cache_data
 def load_geodata(zip_path):
@@ -57,9 +64,12 @@ st.title('Exploración datos inmobiliarios')
 
 # Sidebar
 st.sidebar.title("Menú de navegación")
+#st.sidebar.image("./data/precio200x200.png", use_container_width=True)
+with st.sidebar:
+  st.image("./data/precio200x200.png", width=150)
 seccion = st.sidebar.radio(
     "Selecciona una sección:",
-    ("Visualización de datos medios", "Visualización por distritos", "Información", "Recursos")
+    ("Visualización de datos medios", "Visualización por distritos", "Modelado predictivo", "Información", "Recursos")
 )
 
 if seccion == "Visualización de datos medios":
@@ -151,50 +161,47 @@ elif seccion == "Visualización por distritos":
     
     
     st.write("Localización de outliers")
-    
     # Convertir las coordenadas del DataFrame a WGS84
     original_crs = 25830  # Cambia esto por el EPSG de tu CRS original
     df_wgs84 = convert_to_wgs84(df_flats_filtered, 'X', 'Y', original_crs)
 
-
-    
     # Identificar outliers usando el método IQR
     Q1 = df_wgs84['PRICE'].quantile(0.25)
     Q3 = df_wgs84['PRICE'].quantile(0.75)
     IQR = Q3 - Q1
 
     outliers = df_wgs84[(df_wgs84['PRICE'] < (Q1 - 1.5 * IQR)) | (df_wgs84['PRICE'] > (Q3 + 1.5 * IQR))]
-    
-    if outliers.empty:
-        st.write("No se encontraron outliers.")
-    else:
-        # Calcular el centro del mapa a partir de las coordenadas de los outliers
-        center_lat, center_lon = calculate_map_center(outliers)
+    non_outliers = df_wgs84[(df_wgs84['PRICE'] >= (Q1 - 1.5 * IQR)) & (df_wgs84['PRICE'] <= (Q3 + 1.5 * IQR))]
 
-        # Crear un mapa centrado en el centro calculado
-        m2 = folium.Map(location=[center_lat, center_lon], zoom_start=12)
+    # Calcular el centro del mapa a partir de las coordenadas de todos los inmuebles
+    center_lat, center_lon = calculate_map_center(df_wgs84)
 
-        # Añadir marcadores para los outliers
-        for idx, row in outliers.iterrows():
-            folium.Marker(
-                location=[row['latitude'], row['longitude']],  # Ajusta según las columnas de latitud y longitud en tu DataFrame
-                popup=f"Precio: {row['PRICE']}, Área: {row['AREA']}",
-                icon=folium.Icon(color='red', icon='info-sign')
-            ).add_to(m2)
-
-        # Renderizar el mapa en Streamlit
-        folium_static(m2)
-        
-        
+    # Crear un mapa centrado en el centro calculado
+    m2 = folium.Map(location=[center_lat, center_lon], zoom_start=12)
 
     # Añadir marcadores para los outliers
     for idx, row in outliers.iterrows():
         folium.Marker(
-            location=[row['latitude'], row['longitude']],  # Ajusta según las columnas de latitud y longitud en tu DataFrame
-            popup=f"Precio: {row['PRICE']}, Área: {row['AREA']}",
-            icon=folium.Icon(color='red', icon='info-sign')
+            location=[row['latitude'], row['longitude']],
+            popup=f"Outlier - Precio: {row['PRICE']}, Área: {row['AREA']}",
+            icon=folium.Icon(color='red')
         ).add_to(m2)
+
+    # Añadir marcadores para los no outliers
+    for idx, row in non_outliers.iterrows():
+        folium.Marker(
+            location=[row['latitude'], row['longitude']],
+            popup=f"Precio: {row['PRICE']}, Área: {row['AREA']}",
+            icon=folium.Icon(color='blue')
+        ).add_to(m2)
+
+    # Renderizar el mapa en Streamlit
+    folium_static(m2)
     
+elif seccion == "Modelado predictivo":
+    st.write("Aquí vendrá el modelado predictivo")
+        
+   
 elif seccion == "Información":
     st.write("Información")
     
@@ -208,6 +215,11 @@ elif seccion == "Información":
 elif seccion == "Recursos":
     st.write("Recursos")
     
+        # Leer el contenido del archivo markdown
+    with open("./data/recursos.md", "r", encoding="utf-8") as file:
+        markdown_text = file.read()
+
     # Mostrar el markdown en el sidebar
-    st.markdown("### Esto es markdown ⬇️")
+    st.markdown(markdown_text)
+    
 
