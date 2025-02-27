@@ -21,7 +21,7 @@ def get_median_df_byLOCATIONNAME(feature, df):
 
 st.set_page_config(
     page_title="Housevidsor",
-    page_icon="./data/precio200x200.png", 
+    page_icon="./resources/precio200x200.png", 
 )
 
 
@@ -37,7 +37,7 @@ def load_flats_data(excel_path):
     return pd.read_csv(excel_path, sep=';')
 
 # Carga de ficheros
-zip_path = './data/Barrios.zip'
+zip_path = './datasource/Barrios.zip'
 gdf = load_geodata(zip_path)
 
 excel_path = './datasource/sample-flats-madrid-synthetic-coords.csv'
@@ -63,10 +63,10 @@ m = folium.Map(location=[latitud, longitud], zoom_start=10, tiles='CartoDB posit
 st.title('Exploración datos inmobiliarios')
 
 # Sidebar
-st.sidebar.title("Menú de navegación")
-#st.sidebar.image("./data/precio200x200.png", use_container_width=True)
+st.sidebar.title("Housevidsor")
+
 with st.sidebar:
-  st.image("./data/precio200x200.png", width=150)
+  st.image("./resources/precio200x200.png", width=150)
 seccion = st.sidebar.radio(
     "Selecciona una sección:",
     ("Visualización de datos medios", "Visualización por distritos", "Modelado predictivo", "Información", "Recursos")
@@ -206,7 +206,7 @@ elif seccion == "Información":
     st.write("Información")
     
     # Leer el contenido del archivo markdown
-    with open("./data/info.md", "r", encoding="utf-8") as file:
+    with open("./resources/info.md", "r", encoding="utf-8") as file:
         markdown_text = file.read()
 
     # Mostrar el markdown en el sidebar
@@ -216,7 +216,7 @@ elif seccion == "Recursos":
     st.write("Recursos")
     
         # Leer el contenido del archivo markdown
-    with open("./data/recursos.md", "r", encoding="utf-8") as file:
+    with open("./resources/recursos.md", "r", encoding="utf-8") as file:
         markdown_text = file.read()
 
     # Mostrar el markdown en el sidebar
