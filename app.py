@@ -1,11 +1,13 @@
 import streamlit as st
 import folium
+
 from streamlit_folium import folium_static
 from utiles.data_loading import load_geodata, load_flats_data
 from utiles.data_processing import procesar_datos, get_median_df_byLOCATIONNAME
 from utiles.visualization import mostrar_mapa_y_tabla
 from utiles.constantes import OPCIONES
 from utiles.geo_func import convert_to_wgs84, calculate_map_center
+from utiles.eda_functions import general_tab, descriptiva_tab, numeric_variables_tab, categorical_variables_tab, correlation_tab
 
 st.set_page_config(
     page_title="Housevidsor",
@@ -36,7 +38,7 @@ with st.sidebar:
     st.image("./resources/precio200x200.png", width=150)
     seccion = st.sidebar.radio(
         "Selecciona una sección:",
-        ("Visualización de datos medios", "Visualización por distritos", "Modelado predictivo", "Información", "Recursos")
+        ("EDA", "Visualización de datos medios", "Visualización por distritos", "Modelado predictivo", "Información", "Recursos")
     )
 
 if seccion == "Visualización de datos medios":
@@ -52,6 +54,31 @@ if seccion == "Visualización de datos medios":
         median = get_median_df_byLOCATIONNAME(columna, df_flats)
         gdf = gdf.merge(median, on='NOMBRE', how='left')
         mostrar_mapa_y_tabla(gdf, lista, median, m)
+
+elif seccion == "EDA":
+    # Crear las pestañas
+    tabs = st.tabs(["General", "Descriptiva", "Variables Numéricas", "Variables Categóricas", "Correlación"])
+
+    # Pestaña General
+    with tabs[0]:
+        general_tab(df_flats)
+
+    # Pestaña Descriptiva
+    with tabs[1]:
+        descriptiva_tab(df_flats)
+
+    # Pestaña Variables Numéricas
+    with tabs[2]:
+        numeric_variables_tab(df_flats)
+
+    # Pestaña Variables Categóricas
+    with tabs[3]:
+        categorical_variables_tab(df_flats)
+
+    # Pestaña Correlación
+    with tabs[4]:
+        correlation_tab(df_flats)
+
 
 elif seccion == "Visualización por distritos":
     st.write("Aquí puedes agregar contenido específico para la visualización por distritos.")
