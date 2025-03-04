@@ -7,7 +7,7 @@ from utiles.data_processing import procesar_datos, get_median_df_byLOCATIONNAME
 from utiles.visualization import mostrar_mapa_y_tabla
 from utiles.constantes import OPCIONES
 #from utiles.geo_func import convert_to_wgs84, calculate_map_center
-from utiles.eda_functions import general_tab, descriptiva_tab, numeric_variables_tab, categorical_variables_tab, correlation_tab
+from utiles.eda_functions import general_tab, descriptiva_tab, numeric_variables_tab, categorical_variables_tab, correlation_tab, target_tab
 from utiles.plot_functions import plot_price_distribution, plot_area_vs_price, plot_rooms_baths_vs_price, plot_property_types, plot_amenities_vs_price
 
 st.set_page_config(
@@ -59,7 +59,7 @@ if seccion == "Visualización de datos medios":
 elif seccion == "EDA":
     st.write("Apartado relacionado con Análisis Exploratorio de los Datos.")
     # Crear las pestañas
-    tabs = st.tabs(["General", "Descriptiva", "Variables Numéricas", "Variables Categóricas", "Correlación"])
+    tabs = st.tabs(["General", "Descriptiva", "Variables Numéricas", "Variables Categóricas", "Correlación", "Target"])
 
     # Pestaña General
     with tabs[0]:
@@ -80,6 +80,10 @@ elif seccion == "EDA":
     # Pestaña Correlación
     with tabs[4]:
         correlation_tab(df_flats)
+
+    # Target
+    with tabs[5]:
+        target_tab(df_flats)
 
 
 elif seccion == "Insights visuales":

@@ -1,5 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import plotly.express as px
 import seaborn as sns
 import io
 
@@ -20,17 +21,17 @@ def descriptiva_tab(df):
     st.write("Descripción estadística del dataset:")
     st.write(df.describe(include='all').T)
 
-# def numeric_variables_tab(df):
-#     st.header("Variables Numéricas")
-#     numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
-#     st.write("Descripción estadística de las variables numéricas:")
-#     st.write(df[numeric_cols].describe().T)
-#     st.write("Distribución de las variables numéricas:")
-#     for col in numeric_cols:
-#         st.write(f"Distribución de {col}:")
-#         fig, ax = plt.subplots(figsize=(6, 4))
-#         sns.histplot(df[col], kde=True, ax=ax)
-#         st.pyplot(fig)
+def target_tab(df):
+    st.subheader("Select target column:")    
+    target_column = st.selectbox("", df.columns, index = len(df.columns) - 1)
+
+    st.subheader("Histogram of target column")
+    fig = px.histogram(df, x = target_column)
+    c1, c2, c3 = st.columns([0.5, 2, 0.5])
+    c2.plotly_chart(fig)
+
+
+
 def numeric_variables_tab(df):
     st.header("Variables Numéricas")
     
