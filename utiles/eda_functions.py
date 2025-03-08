@@ -1,23 +1,31 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 import plotly.express as px
-import seaborn as sns
 import io
 import plotly.figure_factory as ff
 import pandas as pd
 
 
 def general_tab(df):
-    buffer = io.StringIO()
+    df.columns = df.columns.str.replace(' ', '_')
+    buffer = io.StringIO() 
     df.info(buf=buffer)
-    s = buffer.getvalue()
-    st.header("General")
-    st.write("Vista previa del dataset:")
-    st.write(df.head())
-    st.write("Dimensiones del dataset:")
-    st.write(f"Filas: {df.shape[0]}, Columnas: {df.shape[1]}")
-    st.write("Información del dataset:")
-    st.text(s)
+    s = buffer.getvalue() 
+
+    df_info = s.split('\n')
+
+    counts = []
+    names = []
+    nn_count = []
+    dtype = []
+    for i in range(5, len(df_info)-3):
+        line = df_info[i].split()
+        counts.append(line[0])
+        names.append(line[1])
+        nn_count.append(line[2])
+        dtype.append(line[4])
+
+    df_info_dataframe = pd.DataFrame(data = {'#':counts, 'Column':names, 'Non-Null Count':nn_count, 'Data Type':dtype})
+    return df_info_dataframe.drop('#', axis = 1)
 
 def descriptiva_tab(df):
     st.header("Descriptiva")
@@ -178,7 +186,7 @@ def nulls_tab(df):
     else:
         c1, c2, c3 = st.columns([0.5, 2, 0.5])
         c2.dataframe(df_isnull(df), width=1500)
-        functions.space(2)
+        space(2)
 
 def df_isnull(df):
     res = pd.DataFrame(df.isnull().sum()).reset_index()
@@ -223,3 +231,7 @@ def number_of_outliers(df):
     outliers_df = outliers_df.sort_values(by="percentage_of_outliers", ascending=False)
 
     return outliers_df
+
+def space(num_lines=1):
+    for _ in range(num_lines):
+        st.write("")
