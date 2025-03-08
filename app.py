@@ -1,5 +1,6 @@
 import streamlit as st
 import folium
+import pandas as pd
 
 #from streamlit_folium import folium_static
 from utiles.data_loading import load_geodata, load_flats_data
@@ -9,6 +10,10 @@ from utiles.constantes import OPCIONES
 #from utiles.geo_func import convert_to_wgs84, calculate_map_center
 from utiles.eda_functions import general_tab, descriptiva_tab, numeric_variables_tab, categorical_variables_tab, correlation_tab, target_tab,  nulls_tab, outliers_tab
 from utiles.plot_functions import plot_price_distribution, plot_area_vs_price, plot_rooms_baths_vs_price, plot_property_types, plot_amenities_vs_price
+from utiles.model_utils import load_model, load_encoders
+from utiles.preprocessing import encode_categorical_columns, convert_binary_columns
+
+
 
 st.set_page_config(
     page_title="Housevidsor",
@@ -110,16 +115,72 @@ elif seccion == "Insights visuales":
         plot_property_types(df_flats)
     elif choice == "Amenidades vs Precio":
         plot_amenities_vs_price(df_flats)
-    
-elif seccion == "Modelado predictivo":
-    st.write("Aquí vendrá el modelado predictivo")
-    
-    # Leer el contenido del archivo markdown
-    with open("./resources/wip.md", "r", encoding="utf-8") as file:
-        markdown_text = file.read()
 
-    # Mostrar el markdown en el sidebar
-    st.markdown(markdown_text)
+elif seccion == "Modelado predictivo":
+    model = load_model('./model/modelo_xgboost.pkl')
+    encoders = load_encoders('./model/encoders.pkl')
+    
+    st.title('Predicción con XGBoost')
+    st.write("Ingresa los datos para realizar una predicción")
+
+    barrio_options = df_flats['barrio'].unique().tolist()
+    distrito_options = df_flats['distrito'].unique().tolist()
+    status_options = df_flats['STATUS'].unique().tolist()
+    area_max = float(df_flats['AREA'].max())
+    area_min = float(df_flats['AREA'].min())
+    area_median = float(df_flats['AREA'].median())
+    room_max = df_flats['ROOMNUMBER'].max()
+    bath_max = df_flats['BATHNUMBER'].max()
+    
+    area = st.number_input('Área (m²)', min_value=area_min, max_value=area_max, value=area_median)
+    roomnumber = st.number_input('Número de habitaciones', min_value=1, max_value=room_max, value=3)
+    bathnumber = st.number_input('Número de baños', min_value=1, max_value=bath_max, value=2)
+    studio = st.selectbox('¿Es estudio?', ['Sí', 'No'])
+    ispenthouse = st.selectbox('¿Es ático?', ['Sí', 'No'])
+    duplex = st.selectbox('¿Es dúplex?', ['Sí', 'No'])
+    swimmingpool = st.selectbox('¿Tiene piscina?', ['Sí', 'No'])
+    elevator = st.selectbox('¿Tiene ascensor?', ['Sí', 'No'])
+
+    # Campos de entrada para las variables categóricas (usando las opciones extraídas del DataFrame)
+    barrio = st.selectbox('Barrio', barrio_options)
+    distrito = st.selectbox('Distrito', distrito_options)
+    status = st.selectbox('Status', status_options)
+
+    # Crear un DataFrame con los datos de entrada
+    input_data = pd.DataFrame([[area, roomnumber, bathnumber, studio, ispenthouse, duplex,
+                                swimmingpool, elevator, barrio, distrito, status]],
+                                columns=['area', 'roomnumber', 'bathnumber', 'studio', 'ispenthouse', 'duplex',
+                                         'swimmingpool', 'elevator', 'barrio', 'distrito', 'status'])
+
+    # Mostrar los datos de entrada
+    st.write("Datos de entrada:")
+    st.write(input_data)
+
+    # Procesar los datos: convertir columnas binarias y codificar las categóricas
+    input_data = convert_binary_columns(input_data)
+    input_data = encode_categorical_columns(input_data, encoders)
+
+    # Mostrar los datos codificados
+    st.write("Datos codificados:")
+    st.write(input_data)
+
+    # Realizar la predicción cuando el usuario presione un botón
+    if st.button('Realizar predicción'):
+        # Realizar la predicción usando el modelo cargado
+        prediction = model.predict(input_data)
+        
+        # Mostrar el resultado de la predicción
+        st.write(f"Predicción: {prediction[0]}")
+    
+# elif seccion == "Modelado predictivo":
+#     st.write("Aquí vendrá el modelado predictivo")
+    
+#     # Leer el contenido del archivo markdown
+#     with open("./resources/wip.md", "r", encoding="utf-8") as file:
+#         markdown_text = file.read()
+
+#     # Mostrar el markdown en el sidebar
+#     st.markdown(markdown_text)
         
    
 elif seccion == "Información":
