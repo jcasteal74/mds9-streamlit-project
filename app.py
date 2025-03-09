@@ -140,15 +140,15 @@ elif seccion == "Modelado predictivo":
 
     # Ubicar cada radio button en una columna con `label_visibility="collapsed"`
     with col1:
-        studio = st.radio('¿Es estudio?', ['Sí', 'No'], horizontal=True, label_visibility="collapsed")
+        studio = st.radio('¿Es estudio?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
     with col2:
-        ispenthouse = st.radio('¿Es ático?', ['Sí', 'No'], horizontal=True, label_visibility="collapsed")
+        ispenthouse = st.radio('¿Es ático?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
     with col3:
-        duplex = st.radio('¿Es dúplex?', ['Sí', 'No'], horizontal=True, label_visibility="collapsed")
+        duplex = st.radio('¿Es dúplex?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
     with col4:
-        swimmingpool = st.radio('¿Tiene piscina?', ['Sí', 'No'], horizontal=True, label_visibility="collapsed")
+        swimmingpool = st.radio('¿Tiene piscina?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
     with col5:
-        elevator = st.radio('¿Tiene ascensor?', ['Sí', 'No'], horizontal=True, label_visibility="collapsed")
+        elevator = st.radio('¿Tiene ascensor?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
 
     # Campos de entrada para las variables categóricas (usando las opciones extraídas del DataFrame)
     # Seleccionar primero el distrito
