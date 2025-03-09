@@ -5,6 +5,10 @@ def encode_categorical_columns(input_data, encoders):
     input_data['barrio_encoded'] = encoders['barrio'].transform(input_data['barrio'])
     input_data['distrito_encoded'] = encoders['distrito'].transform(input_data['distrito'])
     input_data['status_encoded'] = encoders['status'].transform(input_data['status'])
+    
+    # Eliminar las columnas originales
+    input_data = input_data.drop(columns=['barrio', 'distrito', 'status'])
+    
     return input_data
 
 # Función para convertir las respuestas 'Sí'/'No' a valores binarios

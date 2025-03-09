@@ -123,7 +123,6 @@ elif seccion == "Modelado predictivo":
     st.title('Predicción con XGBoost')
     st.write("Ingresa los datos para realizar una predicción")
 
-    barrio_options = df_flats['barrio'].unique().tolist()
     distrito_options = df_flats['distrito'].unique().tolist()
     status_options = df_flats['STATUS'].unique().tolist()
     area_max = float(df_flats['AREA'].max())
@@ -132,18 +131,34 @@ elif seccion == "Modelado predictivo":
     room_max = df_flats['ROOMNUMBER'].max()
     bath_max = df_flats['BATHNUMBER'].max()
     
-    area = st.number_input('Área (m²)', min_value=area_min, max_value=area_max, value=area_median)
-    roomnumber = st.number_input('Número de habitaciones', min_value=1, max_value=room_max, value=3)
-    bathnumber = st.number_input('Número de baños', min_value=1, max_value=bath_max, value=2)
-    studio = st.selectbox('¿Es estudio?', ['Sí', 'No'])
-    ispenthouse = st.selectbox('¿Es ático?', ['Sí', 'No'])
-    duplex = st.selectbox('¿Es dúplex?', ['Sí', 'No'])
-    swimmingpool = st.selectbox('¿Tiene piscina?', ['Sí', 'No'])
-    elevator = st.selectbox('¿Tiene ascensor?', ['Sí', 'No'])
+    area = st.slider('Área (m²)', min_value=area_min, max_value=area_max, value=area_median)
+    roomnumber = st.slider('Número de habitaciones', min_value=1, max_value=room_max, value=3)
+    bathnumber = st.slider('Número de baños', min_value=1, max_value=bath_max, value=2)
+
+    # Crear columnas para los radio buttons
+    col1, col2, col3, col4, col5 = st.columns(5)
+
+    # Ubicar cada radio button en una columna
+    with col1:
+        studio = st.radio('¿Es estudio?', ['Sí', 'No'], horizontal=True)
+    with col2:
+        ispenthouse = st.radio('¿Es ático?', ['Sí', 'No'], horizontal=True)
+    with col3:
+        duplex = st.radio('¿Es dúplex?', ['Sí', 'No'], horizontal=True)
+    with col4:
+        swimmingpool = st.radio('¿Tiene piscina?', ['Sí', 'No'], horizontal=True)
+    with col5:
+        elevator = st.radio('¿Tiene ascensor?', ['Sí', 'No'], horizontal=True)
 
     # Campos de entrada para las variables categóricas (usando las opciones extraídas del DataFrame)
-    barrio = st.selectbox('Barrio', barrio_options)
+    # Seleccionar primero el distrito
     distrito = st.selectbox('Distrito', distrito_options)
+    
+    # Filtrar barrios según el distrito seleccionado
+    barrio_options = df_flats[df_flats['distrito'] == distrito]['barrio'].unique().tolist()
+    barrio = st.selectbox('Barrio', barrio_options)
+    
+    # Seleccionar status
     status = st.selectbox('Status', status_options)
 
     # Crear un DataFrame con los datos de entrada
