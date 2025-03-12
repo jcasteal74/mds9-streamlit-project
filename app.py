@@ -17,7 +17,7 @@ from utiles.preprocessing import encode_categorical_columns, convert_binary_colu
 
 st.set_page_config(
     page_title="Housevidsor",
-    layout="wide",
+    layout="centered",
     page_icon="./resources/precio200x200.png", 
 )
 
@@ -44,7 +44,7 @@ with st.sidebar:
     st.image("./resources/precio200x200.png", width=150)
     seccion = st.sidebar.radio(
         "Selecciona una sección:",
-        ("EDA", "Visualización de datos medios", "Insights visuales", "Modelado predictivo", "Información", "Recursos")
+        ("EDA", "Visualización de datos medios", "Insights visuales", "Modelado predictivo", "Información")
     )
 
 if seccion == "Visualización de datos medios":
@@ -68,7 +68,7 @@ elif seccion == "EDA":
 
     # Pestaña General
     with tabs[0]:
-        general_tab(df_flats)
+        st.dataframe(general_tab(df_flats))
 
     # Pestaña Descriptiva
     with tabs[1]:
@@ -131,34 +131,52 @@ elif seccion == "Modelado predictivo":
     room_max = df_flats['ROOMNUMBER'].max()
     bath_max = df_flats['BATHNUMBER'].max()
     
-    area = st.slider('Área (m²)', min_value=area_min, max_value=area_max, value=area_median)
-    roomnumber = st.slider('Número de habitaciones', min_value=1, max_value=room_max, value=3)
-    bathnumber = st.slider('Número de baños', min_value=1, max_value=bath_max, value=2)
+    # Valores de referencia para los sliders (ajusta según necesites)
+    area_min = 20
+    area_median = 50
 
-    # Crear columnas para los radio buttons
+    # Disposición de los sliders en una misma fila
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        area = st.slider('Área (m²)', min_value=area_min, max_value=area_median * 5, value=area_median)
+    with col2:
+        roomnumber = st.slider('Número de habitaciones', min_value=1, max_value=15, value=3)
+    with col3:
+        bathnumber = st.slider('Número de baños', min_value=1, max_value=10, value=2)
+
+    # Espaciado entre secciones
+    st.markdown("---")
+
+    # Disposición de los radio buttons en otra fila
     col1, col2, col3, col4, col5 = st.columns(5)
 
-    # Ubicar cada radio button en una columna con `label_visibility="collapsed"`
     with col1:
-        studio = st.radio('¿Es estudio?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
+        studio = st.radio('¿Es estudio?', ['Sí', 'No'], horizontal=True)
     with col2:
-        ispenthouse = st.radio('¿Es ático?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
+        ispenthouse = st.radio('¿Es ático?', ['Sí', 'No'], horizontal=True)
     with col3:
-        duplex = st.radio('¿Es dúplex?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
+        duplex = st.radio('¿Es dúplex?', ['Sí', 'No'], horizontal=True)
     with col4:
-        swimmingpool = st.radio('¿Tiene piscina?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
+        swimmingpool = st.radio('¿Tiene piscina?', ['Sí', 'No'], horizontal=True)
     with col5:
-        elevator = st.radio('¿Tiene ascensor?', ['Sí', 'No'], horizontal=True, label_visibility="visible")
+        elevator = st.radio('¿Tiene ascensor?', ['Sí', 'No'], horizontal=True)
 
-    # Campos de entrada para las variables categóricas (usando las opciones extraídas del DataFrame)
-    # Seleccionar primero el distrito
-    distrito = st.selectbox('Distrito', distrito_options)
-    
-    # Filtrar barrios según el distrito seleccionado
-    barrio_options = df_flats[df_flats['distrito'] == distrito]['barrio'].unique().tolist()
-    barrio = st.selectbox('Barrio', barrio_options)
-    
-    # Seleccionar status
+    # Distribuir "Distrito" y "Barrio" en una misma línea
+    col1, col2 = st.columns(2)
+
+    with col1:
+        distrito = st.selectbox('Distrito', distrito_options)
+
+    with col2:
+        # Filtrar barrios según el distrito seleccionado
+        barrio_options = df_flats[df_flats['distrito'] == distrito]['barrio'].unique().tolist()
+        barrio = st.selectbox('Barrio', barrio_options)
+
+    # Espaciado entre secciones
+    st.markdown("---")
+
+    # Seleccionar status en una nueva línea
     status = st.selectbox('Status', status_options)
 
     # Crear un DataFrame con los datos de entrada
@@ -167,17 +185,9 @@ elif seccion == "Modelado predictivo":
                                 columns=['area', 'roomnumber', 'bathnumber', 'studio', 'ispenthouse', 'duplex',
                                          'swimmingpool', 'elevator', 'barrio', 'distrito', 'status'])
 
-    # Mostrar los datos de entrada
-    st.write("Datos de entrada:")
-    st.write(input_data)
-
     # Procesar los datos: convertir columnas binarias y codificar las categóricas
     input_data = convert_binary_columns(input_data)
     input_data = encode_categorical_columns(input_data, encoders)
-
-    # Mostrar los datos codificados
-    st.write("Datos codificados:")
-    st.write(input_data)
 
     # Realizar la predicción cuando el usuario presione un botón
     if st.button('Realizar predicción'):
@@ -187,15 +197,6 @@ elif seccion == "Modelado predictivo":
         # Mostrar el resultado de la predicción
         st.write(f"Predicción: {prediction[0]}")
     
-# elif seccion == "Modelado predictivo":
-#     st.write("Aquí vendrá el modelado predictivo")
-    
-#     # Leer el contenido del archivo markdown
-#     with open("./resources/wip.md", "r", encoding="utf-8") as file:
-#         markdown_text = file.read()
-
-#     # Mostrar el markdown en el sidebar
-#     st.markdown(markdown_text)
         
    
 elif seccion == "Información":
