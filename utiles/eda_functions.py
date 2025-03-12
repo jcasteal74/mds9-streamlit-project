@@ -6,26 +6,15 @@ import pandas as pd
 
 
 def general_tab(df):
-    df.columns = df.columns.str.replace(' ', '_')
-    buffer = io.StringIO() 
-    df.info(buf=buffer)
-    s = buffer.getvalue() 
+    df.columns = df.columns.str.replace(' ', '_')  
+    df_summary = pd.DataFrame({
+        'Column': df.columns,
+        'Non-Null Count': df.notnull().sum(),
+        'Data Type': df.dtypes.astype(str)
+    }).reset_index(drop=True)
+    
+    return df_summary
 
-    df_info = s.split('\n')
-
-    counts = []
-    names = []
-    nn_count = []
-    dtype = []
-    for i in range(5, len(df_info)-3):
-        line = df_info[i].split()
-        counts.append(line[0])
-        names.append(line[1])
-        nn_count.append(line[2])
-        dtype.append(line[4])
-
-    df_info_dataframe = pd.DataFrame(data = {'#':counts, 'Column':names, 'Non-Null Count':nn_count, 'Data Type':dtype})
-    return df_info_dataframe.drop('#', axis = 1)
 
 def descriptiva_tab(df):
     st.header("Descriptiva")
