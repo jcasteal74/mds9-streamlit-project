@@ -1,6 +1,6 @@
 import folium
 from streamlit_folium import folium_static
-import streamlit as st
+
 
 def mostrar_mapa_y_tabla(gdf, lista, median, m):
     folium.Choropleth(

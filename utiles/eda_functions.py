@@ -1,6 +1,5 @@
 import streamlit as st
 import plotly.express as px
-import io
 import plotly.figure_factory as ff
 import pandas as pd
 
@@ -17,13 +16,12 @@ def general_tab(df):
 
 
 def descriptiva_tab(df):
-    st.header("Descriptiva")
-    st.write("Descripción estadística del dataset:")
+    st.subheader("Descripción estadística del dataset:")
     st.write(df.describe(include='all').T)
 
 def target_tab(df):
     st.subheader("Select target column:")    
-    target_column = st.selectbox("", df.columns, index = len(df.columns) - 1)
+    target_column = st.selectbox("", df.columns, index = len(df.columns) - 1, )
 
     st.subheader(f"Histogram of target column: {target_column}")
     fig = px.histogram(df, x = target_column)
@@ -96,12 +94,9 @@ def numeric_variables_tab(df):
         st.plotly_chart(fig_box, use_container_width=True)
 
 
-    
-    #st.write(df[selected_col].describe().T)
-
 
 def categorical_variables_tab(df):
-    st.header("Variables Categóricas")
+    st.subheader("Variables Categóricas")
     
     # Seleccionar columnas categóricas
     categorical_cols = df.select_dtypes(include=['object', 'category']).columns
@@ -144,7 +139,7 @@ def categorical_variables_tab(df):
 
     
 def correlation_tab(df):
-    st.header("Correlación")
+    st.subheader("Correlación")
     
     # Seleccionar solo columnas numéricas
     columnas_numericas = df.select_dtypes(include=['number']).columns

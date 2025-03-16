@@ -2,24 +2,19 @@ import streamlit as st
 import folium
 import pandas as pd
 
-#from streamlit_folium import folium_static
 from utiles.data_loading import load_geodata, load_flats_data
 from utiles.data_processing import procesar_datos, get_median_df_byLOCATIONNAME
 from utiles.visualization import mostrar_mapa_y_tabla
 from utiles.constantes import OPCIONES
-#from utiles.geo_func import convert_to_wgs84, calculate_map_center
-from utiles.eda_functions import general_tab, descriptiva_tab, numeric_variables_tab, categorical_variables_tab, correlation_tab, target_tab,  nulls_tab, outliers_tab
+from utiles.eda_functions import descriptiva_tab, numeric_variables_tab, categorical_variables_tab, correlation_tab, target_tab,  nulls_tab, outliers_tab
 from utiles.plot_functions import plot_price_distribution, plot_area_vs_price, plot_rooms_baths_vs_price, plot_property_types, plot_amenities_vs_price
 from utiles.model_utils import load_model, load_encoders
 from utiles.preprocessing import encode_categorical_columns, convert_binary_columns
+from utiles.inicializar import initialization_streamlit_page
 
 
-
-st.set_page_config(
-    page_title="Housevidsor",
-    layout="centered",
-    page_icon="./resources/precio200x200.png", 
-)
+# Inicializamos la parte de estilo de la página
+initialization_streamlit_page()
 
 # Carga de ficheros
 zip_path = './datasource/Barrios.zip'
@@ -64,38 +59,34 @@ if seccion == "Visualización de datos medios":
 elif seccion == "EDA":
     st.write("Apartado relacionado con Análisis Exploratorio de los Datos.")
     # Crear las pestañas
-    tabs = st.tabs(["General", "Descriptiva", "Variables Numéricas", "Variables Categóricas", "Correlación", "Target", "Nulos", "Outliers"])
-
-    # Pestaña General
-    with tabs[0]:
-        st.dataframe(general_tab(df_flats))
+    tabs = st.tabs(["Descriptiva", "Variables Numéricas", "Variables Categóricas", "Correlación", "Target", "Nulos", "Outliers"])
 
     # Pestaña Descriptiva
-    with tabs[1]:
+    with tabs[0]:
         descriptiva_tab(df_flats)
 
     # Pestaña Variables Numéricas
-    with tabs[2]:
+    with tabs[1]:
         numeric_variables_tab(df_flats)
 
     # Pestaña Variables Categóricas
-    with tabs[3]:
+    with tabs[2]:
         categorical_variables_tab(df_flats)
 
     # Pestaña Correlación
-    with tabs[4]:
+    with tabs[3]:
         correlation_tab(df_flats)
 
     # Target
-    with tabs[5]:
+    with tabs[4]:
         target_tab(df_flats)
 
     # Nulos
-    with tabs[6]:
+    with tabs[5]:
         nulls_tab(df_flats)
 
     # Outliers
-    with tabs[7]:
+    with tabs[6]:
         outliers_tab(df_flats)
 
 
