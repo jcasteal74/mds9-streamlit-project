@@ -15,5 +15,5 @@ def mostrar_mapa_y_tabla(gdf, lista, m):
         line_opacity=0.2,
         legend_name=f'{lista[1]} medio por barrio'
     ).add_to(m)
+    folium_static(m)
     folium.LayerControl().add_to(m)
-    folium_static(m)    

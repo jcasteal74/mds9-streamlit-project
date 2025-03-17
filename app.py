@@ -59,6 +59,7 @@ if seccion == "Visualización de datos medios":
         print(gdf.info())
         mostrar_mapa_y_tabla(gdf, lista, m)
 
+
 elif seccion == "EDA":
     st.write("Apartado relacionado con Análisis Exploratorio de los Datos.")
     # Crear las pestañas
