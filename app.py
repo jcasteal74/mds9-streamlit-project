@@ -26,8 +26,7 @@ df_flats = load_flats_data(excel_path)
 # Transformación fichero flats
 gdf, df_flats, latitud, longitud = procesar_datos(gdf, df_flats)
 
-# Crear mapa base
-m = folium.Map(location=[latitud, longitud], zoom_start=10, tiles='CartoDB positron')
+
 
 # Interfaz de usuario de Streamlit
 st.title('Exploración datos inmobiliarios')
@@ -49,12 +48,16 @@ if seccion == "Visualización de datos medios":
     )
     
     if opcion in OPCIONES:
+        # Crear mapa base
+        m = folium.Map(location=[latitud, longitud], zoom_start=10, tiles='CartoDB positron')
         columna, mensaje = OPCIONES[opcion]
         lista = ['NOMBRE', columna]
         st.write(f"Has elegido {mensaje}:")
         median = get_median_df_byLOCATIONNAME(columna, df_flats)
+        print(median.info())
         gdf = gdf.merge(median, on='NOMBRE', how='left')
-        mostrar_mapa_y_tabla(gdf, lista, median, m)
+        print(gdf.info())
+        mostrar_mapa_y_tabla(gdf, lista, m)
 
 elif seccion == "EDA":
     st.write("Apartado relacionado con Análisis Exploratorio de los Datos.")
@@ -88,7 +91,6 @@ elif seccion == "EDA":
     # Outliers
     with tabs[6]:
         outliers_tab(df_flats)
-
 
 elif seccion == "Insights visuales":
     st.write("Aquí puedes agregar contenido específico para la visualización de insights")

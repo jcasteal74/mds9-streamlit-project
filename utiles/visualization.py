@@ -2,7 +2,8 @@ import folium
 from streamlit_folium import folium_static
 
 
-def mostrar_mapa_y_tabla(gdf, lista, median, m):
+def mostrar_mapa_y_tabla(gdf, lista, m):
+    print(lista)
     folium.Choropleth(
         geo_data=gdf.to_json(),
         name='choropleth',
@@ -15,4 +16,4 @@ def mostrar_mapa_y_tabla(gdf, lista, median, m):
         legend_name=f'{lista[1]} medio por barrio'
     ).add_to(m)
     folium.LayerControl().add_to(m)
-    folium_static(m)
+    folium_static(m)    
